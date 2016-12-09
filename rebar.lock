@@ -1,0 +1,12 @@
+[{<<"envy">>,
+  {git,"git://github.com/manderson26/envy.git",
+       {ref,"0148fb4b7ed0e188511578e98b42d6e7dde0ebd1"}},
+  1},
+ {<<"pooler">>,
+  {git,"git://github.com/seth/pooler.git",
+       {ref,"b6c522a67a1d067122705ef725535a8664dd8514"}},
+  1},
+ {<<"sync">>,
+  {git,"https://github.com/rustyio/sync",
+       {ref,"20846b02126846d69f1f4b2d00fcad580ef5c0d0"}},
+  0}].

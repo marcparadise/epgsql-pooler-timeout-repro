@@ -3,7 +3,7 @@
 %% @end
 %%%-------------------------------------------------------------------
 
--module(epgsql-test_app).
+-module(epgsql_test_app).
 
 -behaviour(application).
 
@@ -15,7 +15,7 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
-    epgsql-test_sup:start_link().
+    epgsql_test_sup:start_link().
 
 %%--------------------------------------------------------------------
 stop(_State) ->

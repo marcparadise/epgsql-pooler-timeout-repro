@@ -3,7 +3,7 @@
 %% @end
 %%%-------------------------------------------------------------------
 
--module(epgsql-test_sup).
+-module(epgsql_test_sup).
 
 -behaviour(supervisor).
 
