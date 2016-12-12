@@ -1,13 +1,22 @@
 -module(failures).
--compile(export_all).
-% You;ll need to define HOST, USER, PASS, NAME, PORT
+-export([do_it/0,
+         init/0,
+         ping_forever/0,
+         ping/0]).
+
+do_it() ->
+    init(),
+    spawn(fun ping_forever/0).
+
 
 init() ->
-    SqerlEnv = [{db_host, ?HOST},
-                {db_port, ?PORT),
-                {db_user, ?USER},
-                {db_pass, ?PASS},
-                {db_name, ?NAME},
+    Host = os:getenv("test_pgsql_host", "localhost"),
+    io:fwrite("Connecting to host: ~p~n", [Host]),
+    SqerlEnv = [{db_host, Host},
+                {db_port, 5432},
+                {db_user, "epgsql_test"},
+                {db_pass, "epgsql_test"},
+                {db_name, "epgsql_test"},
                 {idle_check, 1000},
                 {prepared_statements, [{ping, <<"select current_timestamp">>}]},
                 {column_transforms, []}],
@@ -16,24 +25,32 @@ init() ->
     io:format("Sqerl env: ~p~n", [SqerlEnv]),
 
     PoolConfig = [{name, sqerl},
-                  {max_count, 1},
-                  {init_count, 1},
+                  {max_count, 5},
+                  {init_count, 5},
                   {start_mfa, {sqerl_client, start_link, []}}],
     ok = application:set_env(pooler, pools, [PoolConfig]),
     application:ensure_all_started(sqerl).
 
 ping_forever() ->
-    case sqerl:execute(ping) of
-        {ok, _} ->
-            io:fwrite("."),
-            ok;
-        Error ->
-            io:fwrite("~nOopsie: ~p~n", [Error])
-    end,
+    ping(),
     timer:sleep(100),
     ping_forever().
 
+% This version will recover because of the try block - this is
+% probably not the approach we want but it's a starting point.
+ping() ->
+    try sqerl:execute(ping)  of
+        {ok, _} -> io:fwrite(".");
+        Error -> io:fwrite("~nOopsie: ~p~n", [Error])
+    catch Error:Reason ->
+        io:fwrite("~nError thrown! ~p:~p ~n", [Error, Reason])
+    end.
 
-do_it() ->
-    init(),
-    spawn(fun ping_forever/0).
+% This version will not - it will no longer hang indefnitely
+% but the pool will be exhausted and the supervisor will give up on
+% creating new connectionn.
+%ping() ->
+    %case sqerl:execute(ping)  of
+        %{ok, _} -> io:fwrite(".");
+        %Error -> io:fwrite("~nOopsie: ~p~n", [Error])
+    %end.
